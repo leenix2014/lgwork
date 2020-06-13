@@ -5,7 +5,6 @@ import com.lagou.edu.anno.Component;
 import com.lagou.edu.pojo.Account;
 import com.lagou.edu.dao.AccountDao;
 import com.lagou.edu.utils.ConnectionUtils;
-import com.lagou.edu.utils.DruidUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

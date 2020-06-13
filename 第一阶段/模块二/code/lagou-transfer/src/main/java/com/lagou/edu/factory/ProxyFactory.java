@@ -2,7 +2,6 @@ package com.lagou.edu.factory;
 
 import com.lagou.edu.anno.Autowired;
 import com.lagou.edu.anno.Component;
-import com.lagou.edu.pojo.Account;
 import com.lagou.edu.utils.TransactionManager;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;

@@ -1,17 +1,13 @@
 package com.lagou.edu.factory;
 
 import com.lagou.edu.anno.Autowired;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+import com.lagou.edu.anno.Component;
+import com.lagou.edu.utils.ScanUtils;
 
-import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 应癫
@@ -32,30 +28,52 @@ public class BeanFactory {
     static {
         // 任务一：读取解析xml，通过反射技术实例化对象并且存储待用（map集合）
         // 加载xml
-        InputStream resourceAsStream = BeanFactory.class.getClassLoader().getResourceAsStream("beans.xml");
-        // 解析xml
-        SAXReader saxReader = new SAXReader();
-        try {
-            Document document = saxReader.read(resourceAsStream);
-            Element rootElement = document.getRootElement();
-            List<Element> beanList = rootElement.selectNodes("//bean");
-            for (int i = 0; i < beanList.size(); i++) {
-                Element element =  beanList.get(i);
-                // 处理每个bean元素，获取到该元素的id 和 class 属性
-                String id = element.attributeValue("id");        // accountDao
-                String clazz = element.attributeValue("class");  // com.lagou.edu.dao.impl.JdbcAccountDaoImpl
-                // 通过反射技术实例化对象
-                Class<?> aClass = Class.forName(clazz);
-                Object o = aClass.newInstance();  // 实例化之后的对象
+//        InputStream resourceAsStream = BeanFactory.class.getClassLoader().getResourceAsStream("beans.xml");
+//        // 解析xml
+//        SAXReader saxReader = new SAXReader();
+//        try {
+//            Document document = saxReader.read(resourceAsStream);
+//            Element rootElement = document.getRootElement();
+//            List<Element> beanList = rootElement.selectNodes("//bean");
+//            for (int i = 0; i < beanList.size(); i++) {
+//                Element element =  beanList.get(i);
+//                // 处理每个bean元素，获取到该元素的id 和 class 属性
+//                String id = element.attributeValue("id");        // accountDao
+//                String clazz = element.attributeValue("class");  // com.lagou.edu.dao.impl.JdbcAccountDaoImpl
+//                // 通过反射技术实例化对象
+//                Class<?> aClass = Class.forName(clazz);
+//                Object o = aClass.newInstance();  // 实例化之后的对象
+//
+//                // 存储到map中待用
+//                map.put(id,o);
+//                typeMap.put(aClass.getCanonicalName(), o);
+//                for(Class interf : aClass.getInterfaces()) {
+//                    typeMap.put(interf.getCanonicalName(), o);
+//                }
+//            }
 
-                // 存储到map中待用
-                map.put(id,o);
-                typeMap.put(aClass.getCanonicalName(), o);
-                for(Class interf : aClass.getInterfaces()) {
+        try {
+            // Component处理
+            Set<Class> classes = ScanUtils.getClasssFromPackage("com.lagou.edu");
+            for(Class clazz : classes) {
+                Component service = (Component)clazz.getAnnotation(Component.class);
+                if (service == null) {
+                    continue;
+                }
+                Object o = clazz.newInstance();
+                String id = service.value();
+                if("".equals(id)) {
+                    id = firstLowerCase(clazz.getSimpleName());
+                }
+                map.put(id, o);
+                typeMap.put(clazz.getCanonicalName(), o);
+                for(Class interf : clazz.getInterfaces()) {
+                    map.put(firstLowerCase(interf.getSimpleName()), o);
                     typeMap.put(interf.getCanonicalName(), o);
                 }
             }
 
+            // Autowired处理
             for (Object bean : map.values()) {
                 Class beanClazz = bean.getClass();
                 for (Field field : beanClazz.getDeclaredFields()) {
@@ -106,10 +124,10 @@ public class BeanFactory {
 
 
 
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+//        } catch (DocumentException e) {
+//            e.printStackTrace();
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -120,10 +138,21 @@ public class BeanFactory {
 
     }
 
+    public static String firstLowerCase(String name){
+        if (name == null || name.length() == 0){
+            return "";
+        }
+        return name.substring(0,1).toLowerCase() + name.substring(1);
+    }
+
 
     // 任务二：对外提供获取实例对象的接口（根据id获取）
     public static  Object getBean(String id) {
-        return map.get(id);
+        Object obj = map.get(id);
+        if (obj == null){
+            System.out.println("Can't find object:"+id);
+        }
+        return obj;
     }
 
 }
