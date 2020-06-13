@@ -2,6 +2,7 @@ package com.lagou.edu.factory;
 
 import com.lagou.edu.anno.Autowired;
 import com.lagou.edu.anno.Component;
+import com.lagou.edu.anno.Transactional;
 import com.lagou.edu.utils.ScanUtils;
 
 import java.lang.reflect.Field;
@@ -65,11 +66,21 @@ public class BeanFactory {
                 if("".equals(id)) {
                     id = firstLowerCase(clazz.getSimpleName());
                 }
+                // Transactional即时处理（ProxyFactory不能使用Service和Autowired）
+//                if (clazz.isAnnotationPresent(Transactional.class)) {
+//                    Object proxy = new ProxyFactory().getJdkProxy(o);
+//                    o = proxy;
+//                }
                 map.put(id, o);
+                System.out.println("生成"+id+"的Bean");
                 typeMap.put(clazz.getCanonicalName(), o);
+                System.out.println("缓存"+clazz.getCanonicalName()+"的Bean");
                 for(Class interf : clazz.getInterfaces()) {
-                    map.put(firstLowerCase(interf.getSimpleName()), o);
+                    String interfName = firstLowerCase(interf.getSimpleName());
+                    map.put(interfName, o);
+                    System.out.println("缓存"+interfName+"的Bean");
                     typeMap.put(interf.getCanonicalName(), o);
+                    System.out.println("缓存"+interf.getCanonicalName()+"的Bean");
                 }
             }
 
@@ -92,6 +103,25 @@ public class BeanFactory {
                         field.set(bean, diBean);
                     }
                 }
+            }
+
+            // Transactional后置处理（ProxyFactory能使用Service和Autowired）
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object bean = entry.getValue();
+                Class beanClazz = bean.getClass();
+                if (!beanClazz.isAnnotationPresent(Transactional.class)) {
+                    continue;
+                }
+                String id = entry.getKey();
+                ProxyFactory proxyFactory = (ProxyFactory) map.get("proxyFactory");
+                if (beanClazz.isInterface()){
+                    Object proxy = proxyFactory.getJdkProxy(bean);
+                    map.put(id, proxy);
+                } else {
+                    Object proxy = proxyFactory.getCglibProxy(bean);
+                    map.put(id, proxy);
+                }
+                System.out.println("生成"+id+"的事务代理");
             }
 
             // 实例化完成之后维护对象的依赖关系，检查哪些对象需要传值进入，根据它的配置，我们传入相应的值

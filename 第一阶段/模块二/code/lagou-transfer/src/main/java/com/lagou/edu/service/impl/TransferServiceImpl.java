@@ -11,6 +11,7 @@ import com.lagou.edu.service.TransferService;
  * @author 应癫
  */
 @Component
+@Transactional
 public class TransferServiceImpl implements TransferService {
 
     //private AccountDao accountDao = new JdbcAccountDaoImpl();
@@ -30,7 +31,7 @@ public class TransferServiceImpl implements TransferService {
 
 
     @Override
-    @Transactional
+//    @Transactional
     public void transfer(String fromCardNo, String toCardNo, int money) throws Exception {
 
         /*try{

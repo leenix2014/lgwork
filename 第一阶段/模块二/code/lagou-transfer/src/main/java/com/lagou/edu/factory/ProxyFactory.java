@@ -2,6 +2,7 @@ package com.lagou.edu.factory;
 
 import com.lagou.edu.anno.Autowired;
 import com.lagou.edu.anno.Component;
+import com.lagou.edu.anno.Transactional;
 import com.lagou.edu.utils.TransactionManager;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -53,6 +54,9 @@ public class ProxyFactory {
                 new InvocationHandler() {
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+//                        if(method.isAnnotationPresent(Transactional.class)){//方法的事务配置覆盖类的配置
+//
+//                        }
                         Object result = null;
 
                         try{
@@ -90,6 +94,9 @@ public class ProxyFactory {
         return  Enhancer.create(obj.getClass(), new MethodInterceptor() {
             @Override
             public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+//                if(method.isAnnotationPresent(Transactional.class)){//方法的事务配置覆盖类的配置
+//
+//                }
                 Object result = null;
                 try{
                     // 开启事务(关闭事务的自动提交)

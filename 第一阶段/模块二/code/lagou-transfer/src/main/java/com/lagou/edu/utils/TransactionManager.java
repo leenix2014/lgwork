@@ -41,11 +41,13 @@ public class TransactionManager {
     // 提交事务
     public void commit() throws SQLException {
         connectionUtils.getCurrentThreadConn().commit();
+        System.out.println("事务提交");
     }
 
 
     // 回滚事务
     public void rollback() throws SQLException {
         connectionUtils.getCurrentThreadConn().rollback();
+        System.out.println("事务回滚");
     }
 }
