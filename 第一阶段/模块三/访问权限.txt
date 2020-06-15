@@ -1,0 +1,11 @@
+url1:http://localhost:8080/demo/handle01?username=
+url2:http://localhost:8080/demo/handle02?username=
+
+zhang3无法访问url1和url2
+li4可以访问url1和url2
+wang5可以访问url2
+
+以下为允许访问的url
+http://localhost:8080/demo/handle01?username=li4
+http://localhost:8080/demo/handle02?username=li4
+http://localhost:8080/demo/handle02?username=wang5
