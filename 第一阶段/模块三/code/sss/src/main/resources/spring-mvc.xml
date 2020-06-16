@@ -24,4 +24,11 @@
         <!-- 后缀 -->
         <property name="suffix" value=".jsp" />
     </bean>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*"/>
+            <bean class="com.lagou.edu.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 </beans>

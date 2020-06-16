@@ -30,6 +30,7 @@
     </tr>
     <tr>
         <td><input type="submit" value="保存"/></td>
+        <td><a href="/list">返回</a></td>
     </tr>
 </table>
 </form>
