@@ -8,11 +8,19 @@ import java.io.InputStream;
  */
 public class Request {
 
+    private String host;
     private String method; // 请求方式，比如GET/POST
     private String url;  // 例如 /,/index.html
 
     private InputStream inputStream;  // 输入流，其他属性从输入流中解析出来
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
 
     public String getMethod() {
         return method;
@@ -56,13 +64,20 @@ public class Request {
         inputStream.read(bytes);
 
         String inputStr = new String(bytes);
+        System.out.println(inputStr);
+
+        String[] lines = inputStr.split("\\n");
         // 获取第一行请求头信息
-        String firstLineStr = inputStr.split("\\n")[0];  // GET / HTTP/1.1
+        String firstLineStr = lines[0];  // GET / HTTP/1.1
 
         String[] strings = firstLineStr.split(" ");
 
         this.method = strings[0];
         this.url = strings[1];
+
+        String secondLine = lines[1]; // Host: localhost:8080
+        String[] parts = secondLine.split(" ");
+        this.host = parts[1].split(":")[0];
 
         System.out.println("=====>>method:" + method);
         System.out.println("=====>>url:" + url);

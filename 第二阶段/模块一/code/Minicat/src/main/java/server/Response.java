@@ -36,7 +36,8 @@ public class Response {
      */
     public void outputHtml(String path) throws IOException {
         // 获取静态资源文件的绝对路径
-        String absoluteResourcePath = StaticResourceUtil.getAbsolutePath(path);
+//        String absoluteResourcePath = StaticResourceUtil.getAbsolutePath(path);
+        String absoluteResourcePath = path;
 
         // 输入静态资源文件
         File file = new File(absoluteResourcePath);

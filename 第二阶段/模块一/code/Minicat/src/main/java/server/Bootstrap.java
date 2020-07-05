@@ -6,11 +6,11 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,8 @@ import java.util.concurrent.*;
 public class Bootstrap {
 
     /**定义socket监听的端口号*/
-    private int port = 8080;
+    private int port;
+    private Mapper mapper = new Mapper();
 
     public int getPort() {
         return port;
@@ -32,11 +33,12 @@ public class Bootstrap {
         this.port = port;
     }
 
-
     /**
      * Minicat启动需要初始化展开的一些操作
      */
     public void start() throws Exception {
+        //加载server.xml
+        loadConfig();
 
         // 加载解析相关的配置，web.xml
         loadServlet();
@@ -146,7 +148,7 @@ public class Bootstrap {
         while(true) {
 
             Socket socket = serverSocket.accept();
-            RequestProcessor requestProcessor = new RequestProcessor(socket,servletMap);
+            RequestProcessor requestProcessor = new RequestProcessor(socket, mapper);
             //requestProcessor.start();
             threadPoolExecutor.execute(requestProcessor);
         }
@@ -156,48 +158,86 @@ public class Bootstrap {
     }
 
 
-    private Map<String,HttpServlet> servletMap = new HashMap<String,HttpServlet>();
+//    private Map<String,HttpServlet> servletMap = new HashMap<>();
 
     /**
      * 加载解析web.xml，初始化Servlet
      */
-    private void loadServlet() {
-        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("web.xml");
+    private void loadConfig() {
+        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("server.xml");
         SAXReader saxReader = new SAXReader();
 
         try {
             Document document = saxReader.read(resourceAsStream);
             Element rootElement = document.getRootElement();
 
-            List<Element> selectNodes = rootElement.selectNodes("//servlet");
-            for (int i = 0; i < selectNodes.size(); i++) {
-                Element element =  selectNodes.get(i);
-                // <servlet-name>lagou</servlet-name>
-                Element servletnameElement = (Element) element.selectSingleNode("servlet-name");
-                String servletName = servletnameElement.getStringValue();
-                // <servlet-class>server.LagouServlet</servlet-class>
-                Element servletclassElement = (Element) element.selectSingleNode("servlet-class");
-                String servletClass = servletclassElement.getStringValue();
+            Element connector = (Element) rootElement.selectSingleNode("//Service/Connector");
+            this.port = Integer.parseInt(connector.attributeValue("port", "8080"));
 
+            Element host = (Element) rootElement.selectSingleNode("//Service/Engine/Host");
 
-                // 根据servlet-name的值找到url-pattern
-                Element servletMapping = (Element) rootElement.selectSingleNode("/web-app/servlet-mapping[servlet-name='" + servletName + "']");
-                // /lagou
-                String urlPattern = servletMapping.selectSingleNode("url-pattern").getStringValue();
-                servletMap.put(urlPattern, (HttpServlet) Class.forName(servletClass).newInstance());
-
-            }
-
-
-
+            mapper.getMappedHost().put(host.attributeValue("name"), new Mapper.Host(host.attributeValue("appBase")));
         } catch (DocumentException e) {
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 加载解析web.xml，初始化Servlet
+     */
+    private void loadServlet() {
+        // 加载各Host下appBase目录
+        for (Mapper.Host host : mapper.getMappedHost().values()) {
+            File base = new File(host.getAppBase());
+            if (!base.isDirectory()) {
+//                throw new RuntimeException("appBase不是目录");
+                continue;
+            }
+            for (File app : base.listFiles()) {
+                if (!app.isDirectory()) {
+                    continue;
+                }
+                File web = new File(app.getAbsolutePath() + File.separator + "web.xml");
+                if (!web.exists() || !web.isFile()) {
+                    continue;
+                }
+
+                try {
+                    InputStream resourceAsStream = new FileInputStream(web);
+                    SAXReader saxReader = new SAXReader();
+                    Document document = saxReader.read(resourceAsStream);
+                    Element rootElement = document.getRootElement();
+
+                    List<Element> selectNodes = rootElement.selectNodes("//servlet");
+                    for (int i = 0; i < selectNodes.size(); i++) {
+                        Element element = selectNodes.get(i);
+                        // <servlet-name>lagou</servlet-name>
+                        Element servletnameElement = (Element) element.selectSingleNode("servlet-name");
+                        String servletName = servletnameElement.getStringValue();
+                        // <servlet-class>server.LagouServlet</servlet-class>
+                        Element servletclassElement = (Element) element.selectSingleNode("servlet-class");
+                        String servletClass = servletclassElement.getStringValue();
+
+
+                        // 根据servlet-name的值找到url-pattern
+                        Element servletMapping = (Element) rootElement.selectSingleNode("/web-app/servlet-mapping[servlet-name='" + servletName + "']");
+                        // /lagou
+                        String urlPattern = servletMapping.selectSingleNode("url-pattern").getStringValue();
+
+                        // 加载各个app下的类
+                        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{app.toURI().toURL()});
+                        Object object = Class.forName(servletClass, true, classLoader).newInstance();
+                        Mapper.Context context = new Mapper.Context();
+                        context.getServletMap().put(urlPattern, (HttpServlet) object);
+                        host.getMappedContext().put(app.getName(), context);
+                    }
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
