@@ -24,10 +24,18 @@ public class RequestProcessor extends Thread {
             Response response = new Response(socket.getOutputStream());
 
             Mapper.Host host = mapper.getMappedHost().get(request.getHost());
+            if(host == null){
+                response.output(HttpProtocolUtil.getHttpHeader404());
+                return;
+            }
             String[] paths = request.getUrl().split("/");
             String contextPath = paths[1];
             String uri = request.getUrl().replace("/"+contextPath, "");
             Mapper.Context context = host.getMappedContext().get(contextPath);
+            if(context == null){
+                response.output(HttpProtocolUtil.getHttpHeader404());
+                return;
+            }
 
             Map<String, HttpServlet> servletMap =  context.getServletMap();
             HttpServlet servlet = servletMap.get(uri);
