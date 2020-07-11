@@ -4,7 +4,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <title>Resume List<%="http://"+request.getLocalAddr()+":"+request.getLocalPort()%></title>
+    <title>Resume Detail</title>
 </head>
 <body>
 <%="http://"+request.getLocalAddr()+":"+request.getLocalPort()%>

@@ -4,6 +4,7 @@ import com.lagou.edu.pojo.Resume;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  *      封装了复杂的查询（分页、排序等）
  *
  */
+@Repository
 public interface ResumeDao extends JpaRepository<Resume,Long>, JpaSpecificationExecutor<Resume> {
 
 

@@ -23,4 +23,9 @@ public class LoginController {
         session.removeAttribute(LoginInterceptor.LOGINED);
         return "redirect:/";
     }
+
+    @RequestMapping("/")
+    public String toLogin(){
+        return "index";
+    }
 }
