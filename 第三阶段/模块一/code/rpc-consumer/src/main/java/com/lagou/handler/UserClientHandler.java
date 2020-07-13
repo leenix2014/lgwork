@@ -38,7 +38,7 @@ public class UserClientHandler extends ChannelInboundHandlerAdapter implements C
         //context给服务器写数据
 //        context.writeAndFlush(param);
         context.writeAndFlush(request);
-        wait(500);
+        wait();
         return result;
     }
 
