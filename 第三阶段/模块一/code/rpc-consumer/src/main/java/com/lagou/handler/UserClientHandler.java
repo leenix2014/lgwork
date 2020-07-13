@@ -1,5 +1,6 @@
 package com.lagou.handler;
 
+import com.lagou.request.RpcRequest;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -13,7 +14,8 @@ public class UserClientHandler extends ChannelInboundHandlerAdapter implements C
     //1.定义成员变量
     private ChannelHandlerContext context; //事件处理器上下文对象 (存储handler信息,写操作)
     private String result; // 记录服务器返回的数据
-    private String param; //记录将要返送给服务器的数据
+    private String param;
+    private RpcRequest request;
 
     //2.实现channelActive  客户端和服务器连接时,该方法就自动执行
     @Override
@@ -34,13 +36,18 @@ public class UserClientHandler extends ChannelInboundHandlerAdapter implements C
     //4.将客户端的数写到服务器
     public synchronized Object call() throws Exception {
         //context给服务器写数据
-        context.writeAndFlush(param);
-        wait();
+//        context.writeAndFlush(param);
+        context.writeAndFlush(request);
+        wait(500);
         return result;
     }
 
     //5.设置参数的方法
     public void setParam(String param){
         this.param = param;
+    }
+
+    public void setRequest(RpcRequest request){
+        this.request = request;
     }
 }

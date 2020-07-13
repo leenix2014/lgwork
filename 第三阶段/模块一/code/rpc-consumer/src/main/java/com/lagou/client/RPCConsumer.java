@@ -19,6 +19,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -55,10 +56,10 @@ public class RPCConsumer {
                         //获取ChannelPipeline
                         ChannelPipeline pipeline = socketChannel.pipeline();
                         //设置编码
-//                        pipeline.addLast(new StringEncoder());
-//                        pipeline.addLast(new StringDecoder());
-                        pipeline.addLast(new RpcEncoder(RpcRequest.class, new JSONSerializer()));
-                        pipeline.addLast(new RpcDecoder(RpcRequest.class, new JSONSerializer()));
+//                        pipeline.addFirst(new StringEncoder());
+                        pipeline.addFirst(new RpcEncoder(RpcRequest.class, new JSONSerializer()));
+//                        pipeline.addLast(new RpcDecoder(RpcRequest.class, new JSONSerializer()));
+                        pipeline.addLast(new StringDecoder());
                         //添加自定义事件处理器
                         pipeline.addLast(userClientHandler);
                     }
@@ -91,4 +92,20 @@ public class RPCConsumer {
                 });
     }
 
+
+    public static Object callServer(RpcRequest request) throws InterruptedException, ExecutionException {
+        //1)初始化客户端cliet
+        if(userClientHandler == null){
+            initClient();
+        }
+
+        //2)给UserClientHandler 设置request参数
+        userClientHandler.setRequest(request);
+
+        //3).使用线程池,开启一个线程处理处理call() 写操作,并返回结果
+        Object result = executorService.submit(userClientHandler).get();
+
+        //4)return 结果
+        return result;
+    }
 }

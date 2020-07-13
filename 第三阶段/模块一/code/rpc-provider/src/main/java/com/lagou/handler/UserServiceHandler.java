@@ -1,30 +1,43 @@
 package com.lagou.handler;
 
+import com.lagou.request.RpcRequest;
+import com.lagou.service.IUserService;
 import com.lagou.service.UserServiceImpl;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.concurrent.EventExecutorGroup;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
 
 /**
  * 自定义的业务处理器
  */
-public class UserServiceHandler extends ChannelInboundHandlerAdapter {
+@Component
+public class UserServiceHandler extends ChannelInboundHandlerAdapter implements ApplicationContextAware {
+
+    private static ApplicationContext applicationContext;
 
     //当客户端读取数据时,该方法会被调用
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        RpcRequest request = (RpcRequest) msg;
+        String className = request.getClassName();
+        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+        Object bean = applicationContext.getBean(clazz);
 
-        //注意:  客户端将来发送请求的时候会传递一个参数:  UserService#sayHello#are you ok
-         //1.判断当前的请求是否符合规则
-        if(msg.toString().startsWith("UserService")){
-            //2.如果符合规则,调用实现类货到一个result
-            UserServiceImpl service = new UserServiceImpl();
-            String result = service.sayHello(msg.toString().substring(msg.toString().lastIndexOf("#")+1));
-            //3.把调用实现类的方法获得的结果写到客户端
-            ctx.writeAndFlush(result);
-        }
+        String methodName = request.getMethodName();
+        Method method = clazz.getMethod(methodName, request.getParameterTypes());
+        Object result = method.invoke(bean, request.getParameters());
+        ctx.channel().writeAndFlush(result.toString());
+    }
 
-
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
