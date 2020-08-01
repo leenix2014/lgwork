@@ -3,9 +3,18 @@ package com.lagou.util;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.recipes.cache.*;
+import org.apache.curator.framework.recipes.watch.PersistentWatcher;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.AddWatchMode;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.Stat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CuratorUtils {
     static CuratorFramework client;
@@ -29,6 +38,43 @@ public class CuratorUtils {
         try {
             client.create().creatingParentsIfNeeded()
                     .withMode(mode).forPath(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getChildren(String path){
+        List<String> children = new ArrayList<String>();
+        try {
+            children = client.getChildren().forPath(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return children;
+    }
+
+    public static List<String> getChildren(String path, CuratorWatcher watcher){
+        List<String> children = new ArrayList<String>();
+        try {
+            children = client.getChildren().usingWatcher(watcher).forPath(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return children;
+    }
+
+
+    public static void watch(String path, Watcher watcher) {
+        PersistentWatcher persistentWatcher = new PersistentWatcher(client, path, false);
+        persistentWatcher.getListenable().addListener(watcher);
+        persistentWatcher.start();
+    }
+
+    public static void watch(String path, PathChildrenCacheListener listener){
+        PathChildrenCache cache = new PathChildrenCache(client, path, true);
+        cache.getListenable().addListener(listener);
+        try {
+            cache.start();
         } catch (Exception e) {
             e.printStackTrace();
         }

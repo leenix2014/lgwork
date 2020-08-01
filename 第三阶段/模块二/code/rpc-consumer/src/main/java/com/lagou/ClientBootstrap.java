@@ -13,7 +13,7 @@ public class ClientBootstrap {
         while (true) {
             IUserService service = (IUserService) RPCConsumer.createProxy(IUserService.class);
             String result = service.sayHello("test");
-            System.out.println(result);
+            System.out.println("服务器响应数据:"+result);
             Thread.sleep(2000);
         }
     }

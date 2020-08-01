@@ -1,6 +1,7 @@
 package com.lagou.handler;
 
 import com.lagou.request.RpcRequest;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.Callable;
 /**
  *  自定义事件处理器
  */
+@ChannelHandler.Sharable
 public class UserClientHandler extends ChannelInboundHandlerAdapter implements Callable {
 
     //1.定义成员变量
