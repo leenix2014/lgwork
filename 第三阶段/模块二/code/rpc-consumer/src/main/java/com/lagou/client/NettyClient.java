@@ -56,7 +56,7 @@ public class NettyClient extends ChannelInboundHandlerAdapter {
     private ChannelHandlerContext context; //事件处理器上下文对象 (存储handler信息,写操作)
     private String result; // 记录服务器返回的数据
     private Long requestStartTime = Long.MIN_VALUE;
-    private Long lastResponseTime = Long.MAX_VALUE;
+    private Long lastResponseTime = null;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -78,7 +78,7 @@ public class NettyClient extends ChannelInboundHandlerAdapter {
         //context给服务器写数据
         context.writeAndFlush(request);
         requestStartTime = System.currentTimeMillis();
-        wait();
+        wait(500);
         return result;
     }
 

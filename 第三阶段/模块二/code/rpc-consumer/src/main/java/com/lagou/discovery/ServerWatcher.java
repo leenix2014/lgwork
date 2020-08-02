@@ -43,6 +43,10 @@ public class ServerWatcher {
         Long minTime = Long.MAX_VALUE;
         NettyClient minClient = null;
         for (NettyClient client : clients.values()) {
+            if (client.getLastResponseTime() == null){
+                minClient = client;
+                break;
+            }
             if (client.getLastResponseTime() <= minTime){
                 minClient = client;
                 minTime = client.getLastResponseTime();
@@ -51,9 +55,11 @@ public class ServerWatcher {
         return minClient;
     }
 
+    public static Random rand = new Random(System.currentTimeMillis());
+
     public static NettyClient randomServer(){
         Object[] keys = clients.keySet().toArray();
-        int index = new Random().nextInt(keys.length);
+        int index = rand.nextInt(keys.length);
         return clients.get(keys[index]);
     }
 }
