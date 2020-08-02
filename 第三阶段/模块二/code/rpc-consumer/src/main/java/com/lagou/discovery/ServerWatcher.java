@@ -24,6 +24,10 @@ public class ServerWatcher {
             server = server.substring(server.lastIndexOf("/")+1, server.length());
             switch (pathChildrenCacheEvent.getType()){
                 case CHILD_ADDED:
+                    NettyClient c = clients.get(server);
+                    if (c != null) {
+                        c.close();
+                    }
                     clients.put(server, new NettyClient(server).connect());
                     System.out.println("服务器上线："+server);
                     break;

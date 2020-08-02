@@ -17,8 +17,8 @@ public class ClientBootstrap {
         while (true) {
             IUserService service = (IUserService) RPCConsumer.createProxy(IUserService.class);
             String result = service.sayHello("test");
-            System.out.println(new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss").format(new Date())+"服务器响应数据:"+result);
-            Thread.sleep(2000);
+//            System.out.println(new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss").format(new Date())+"服务器响应数据:"+result);
+            Thread.sleep(5000);
         }
     }
 }

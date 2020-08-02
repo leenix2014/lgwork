@@ -72,6 +72,7 @@ public class NettyClient extends ChannelInboundHandlerAdapter {
         //将读到的服务器的数据msg ,设置为成员变量的值
         result = msg.toString();
         lastResponseTime = System.currentTimeMillis() - requestStartTime;
+        System.out.println("服务器("+server+")最近响应时间为:"+lastResponseTime);
         notify();
     }
 
