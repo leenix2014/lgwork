@@ -36,6 +36,9 @@ public class CuratorUtils {
 
     public static void create(String path, CreateMode mode){
         try {
+            if (exists(path)){
+                client.delete().guaranteed().forPath(path);
+            }
             client.create().creatingParentsIfNeeded()
                     .withMode(mode).forPath(path);
         } catch (Exception e) {
