@@ -17,12 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NettyClient extends ChannelInboundHandlerAdapter {
 
     private EventLoopGroup group;
+    private String server;
 
-    public NettyClient() {
-
+    public NettyClient(String server) {
+        this.server = server;
     }
 
-    public NettyClient connect(String server) {
+    public NettyClient connect() {
         NettyClient self = this;
         group = new NioEventLoopGroup();
         Bootstrap bootstrap =  new Bootstrap();

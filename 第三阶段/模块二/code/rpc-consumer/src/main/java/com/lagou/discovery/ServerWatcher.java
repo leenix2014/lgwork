@@ -17,14 +17,14 @@ public class ServerWatcher {
     public static void watch(){
         List<String> servers = RpcRegistry.discovery(IUserService.class);
         for (String server : servers){
-            clients.put(server, new NettyClient().connect(server));
+            clients.put(server, new NettyClient(server).connect());
         }
         RpcRegistry.watch(IUserService.class, (curatorFramework, pathChildrenCacheEvent) -> {
             String server = pathChildrenCacheEvent.getData().getPath();
             server = server.substring(server.lastIndexOf("/")+1, server.length());
             switch (pathChildrenCacheEvent.getType()){
                 case CHILD_ADDED:
-                    clients.put(server, new NettyClient().connect(server));
+                    clients.put(server, new NettyClient(server).connect());
                     System.out.println("服务器上线："+server);
                     break;
                 case CHILD_REMOVED:

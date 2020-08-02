@@ -14,8 +14,8 @@ public class RPCConsumer {
     public static Object createProxy(Class<?> serviceClass){
         return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                 new Class[]{serviceClass}, (o, method, objects) -> {
-                    NettyClient client = ServerWatcher.randomServer();
-//                    NettyClient client = ServerWatcher.minTimeServer();
+//                    NettyClient client = ServerWatcher.randomServer();
+                    NettyClient client = ServerWatcher.minTimeServer();
                     RpcRequest request = new RpcRequest();
 //                    request.setRequestId(UUID.randomUUID().toString());
                     request.setClassName(serviceClass.getName());
