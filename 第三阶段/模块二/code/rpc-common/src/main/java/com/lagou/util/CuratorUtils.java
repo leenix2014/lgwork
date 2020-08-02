@@ -82,4 +82,34 @@ public class CuratorUtils {
             e.printStackTrace();
         }
     }
+
+    public static void setData(String path, byte[] data){
+        if (!exists(path)){
+            create(path, CreateMode.PERSISTENT);
+        }
+        try {
+            client.setData().forPath(path, data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static byte[] getData(String path){
+        try {
+            return client.getData().forPath(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new byte[]{};
+    }
+
+    public static void watchData(String path, NodeCacheListener listener){
+        NodeCache cache = new NodeCache(client, path, true);
+        cache.getListenable().addListener(listener);
+        try {
+            cache.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
