@@ -1,21 +1,15 @@
 package com.lagou.job3;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lagou.util.CuratorUtils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 
 import java.beans.PropertyVetoException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 public class MyDatasourePool {
@@ -31,10 +25,11 @@ public class MyDatasourePool {
         dataSource.setUser((String) prop.get("c3p0.user"));
         dataSource.setPassword((String) prop.get("c3p0.password"));
         if (testConnection(dataSource)) {
-            if (dataSourcePool != null){
-                dataSourcePool.close();
-            }
+            ComboPooledDataSource lastDatasource = dataSourcePool;
             dataSourcePool = dataSource;
+            if (lastDatasource != null){
+                lastDatasource.close();
+            }
         }
     }
 
