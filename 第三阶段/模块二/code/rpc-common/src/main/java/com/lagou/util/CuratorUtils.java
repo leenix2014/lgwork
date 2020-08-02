@@ -104,7 +104,7 @@ public class CuratorUtils {
     }
 
     public static void watchData(String path, NodeCacheListener listener){
-        NodeCache cache = new NodeCache(client, path, true);
+        NodeCache cache = new NodeCache(client, path, false);
         cache.getListenable().addListener(listener);
         try {
             cache.start();
