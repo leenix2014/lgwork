@@ -9,7 +9,7 @@ public class HelloService1Impl implements HelloService1 {
     @Override
     public String sayHello1(String name) {
         String ip = RpcContext.getContext().getAttachment("ip");
-        System.out.println("sayHello attachment:" + ip);
+        System.out.println("sayHello1 attachment:" + ip);
         return "hello1 " + name;
     }
 }
