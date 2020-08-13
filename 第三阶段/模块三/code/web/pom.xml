@@ -15,6 +15,7 @@
         <module>service-mvc</module>
         <module>service-filter</module>
         <module>service-ipfilter</module>
+        <module>service-provider1</module>
     </modules>
 
     <properties>
