@@ -13,6 +13,8 @@ public class DemoController {
 
     @RequestMapping("/test")
     public String test(){
-        return service.sayHello("test");
+        service.sayHello("test");
+        service.sayHi();
+        return "success";
     }
 }

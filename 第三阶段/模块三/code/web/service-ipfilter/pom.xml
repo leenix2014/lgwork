@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>service-filter</artifactId>
+    <artifactId>service-ipfilter</artifactId>
 
     <dependencies>
         <dependency>
@@ -17,6 +17,5 @@
             <artifactId>dubbo</artifactId>
         </dependency>
     </dependencies>
-
 
 </project>

@@ -13,6 +13,8 @@
         <module>service-provider</module>
         <module>service-filter</module>
         <module>service-mvc</module>
+        <module>service-filter</module>
+        <module>service-ipfilter</module>
     </modules>
 
     <properties>
