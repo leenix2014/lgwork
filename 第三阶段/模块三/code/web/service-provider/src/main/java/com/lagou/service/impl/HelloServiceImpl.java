@@ -6,6 +6,6 @@ import org.apache.dubbo.config.annotation.DubboService;
 @DubboService
 public class HelloServiceImpl implements HelloService {
     public String sayHello(String name) {
-        return "hello" + name;
+        return "hello " + name;
     }
 }
