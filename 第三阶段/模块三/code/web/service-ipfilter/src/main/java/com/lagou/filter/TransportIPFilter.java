@@ -1,9 +1,11 @@
 package com.lagou.filter;
 
+import com.lagou.filter.util.WebRequestHolder;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -11,7 +13,8 @@ import java.net.UnknownHostException;
 public class TransportIPFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        invocation.getAttachments().put("ip", getIp());
+        HttpServletRequest request = WebRequestHolder.getRequest();
+        invocation.getAttachments().put("ip", request.getRemoteAddr());
         return invoker.invoke(invocation);
     }
 
